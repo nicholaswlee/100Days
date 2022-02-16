@@ -182,18 +182,8 @@ export default class App extends React.Component {
       drinks,
       drinkInput: ''
     });
-  }/*
-  toggleDone(item){
-    let todos = this.state.todos;
-
-    todos = todos.map((todo) => {
-      if(todo.id == item.id) {
-        todo.done = !todo.done;
-      }
-      return todo;
-    })
-    this.setState({todos});
-  }*/
+  }
+  
   addDrink (item){
     let drinks = this.state.drinks;
     let totalcount = this.state.totalcount;
@@ -226,31 +216,6 @@ export default class App extends React.Component {
                   recentSeconds});
   }
   updateRecent = (item) => {
-    /*
-    this.state.recentSeconds = 0;
-    this.state.recentMinutes = 0;
-    this.state.recentHour = 0;
-    let timer = setInterval(() => {
- 
-      var num = this.state.recentSeconds + 1,
-        count = this.state.recentMinute;
-        hour = this.state.recentHour;
-      if (this.state.recentSeconds == 59) {
-        count = (this.state.recentMinute) + 1;
-        num = 0;
-      }
-      if (this.state.recentMinute == 59) {
-        hour = (this.state.recentHour) + 1;
-        count = 0;
-      }
- 
-      this.setState({
-        recentMinute: count,
-        recentSeconds: num,
-        recentHour: hour
-      });
-    }, 1000);
-    this.setState({ timer });*/
     clearInterval(this.state.timer);
     this.setState(
       {recentHour: 0,
@@ -259,10 +224,6 @@ export default class App extends React.Component {
       } 
     ) 
     console.log("New Drink Timer");
-    /*
-    this.state.recentSeconds = 0;
-    this.state.recentMinutes = 0;
-    this.state.recentHour = 0;*/
     let timer = setInterval(() => {
       var sec = this.state.recentSeconds + 1,
         count = this.state.recentMinute;
