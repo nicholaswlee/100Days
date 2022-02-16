@@ -36,8 +36,8 @@ export default class App extends React.Component {
       ],
       totalcount: 0,
       overCapacity: true,
-      bac: 0.5,
-      weight: 0.1,
+      bac: 0,
+      weight: 100.55,
       weightInput: '',
       gender: '',
       startHour: 0,
@@ -45,39 +45,43 @@ export default class App extends React.Component {
       startSeconds: 0,
       recentHour: 0,
       recentMinute: 0,
-      recentSeconds: 0,
+      recentSeconds: 0, 
+      timeSinceHour: 0, 
+      timeSinceMinute:0, 
+      timeSinceSeconds: 0,
       currentHour: 0,
-      currentMinute: 0
+      currentMinute: 0,
+      drinking: false,
+      oldCount: 0,
+      timer: null,
+      recentDrinking1: false,
+      recentDrinking2: false,
     }
-  }/*
-  getBac(){
-    let totalcount = this.state.totalcount;
-    let bac = this.state.bac;
-    let startHour = this.state.startHour;
-    let startMinute = this.state.startMinute;
-    let currentHour = this.state.currentHour;
-    let currentMinute = this.state.curretMinute;
-    let gender = this.state.gender;
-    let weight = this.state.weight;
-    currentHour = new Date().getHours();
-    currentMinute = new Date().getMinutes();
-    if(gender == "male"){
-      bac = ((totalcount*14)/(weight*494*0.68) *100) - 0.015*((currentHour - startHour) + (currentHour - startMinute)/60);
-    }else{
-      bac = ((totalcount*14)/(weight*494*0.55) *100) - 0.015*((currentHour - startHour) + (currentMinute - startMinute)/60);
-    }
-    this.setState({
-      bac
-    });
   }
+
   componentDidMount(){ 
-    setInterval(() => (
-      
-      this.setState(
-        { bac: this.getBac()}
-      )
-    ), 1000);
-  }*/
+    setInterval(() => {
+      if(this.state.drinking){
+        var sec = (Number(this.state.timeSinceSeconds) + 1),
+          count = this.state.timeSinceMinute;
+          hourCount = this.state.timeSinceHour;
+        if (sec == 59) {
+          count = (Number(this.state.timeSinceMinute) + 1);
+          sec =  0;
+        };
+        if (count == 59) {
+          hourCount = (Number(this.state.timeSinceHour) + 1);
+          count = 0;
+        };
+        this.setState(
+          {timeSinceHour: hourCount,
+          timeSinceMinute: count,
+          timeSinceSeconds: sec,
+          bac: (this.state.gender== ("male")) ?  (((this.state.totalcount*14)/(this.state.weight*494*0.68) *100) - 0.015*((this.state.timeSinceHour) + ((this.state.timeSinceMinute)/60)))*100 : (((this.state.totalcount*14)/(this.state.weight*494*0.55) *100) - 0.015*((this.state.timeSinceHour) + ((this.state.timeSinceMinute)/60)))*100
+          } 
+        )  
+      }}, 1000);
+  }
   genderMale(){
     let gender = this.state.gender;
     gender = "male";
@@ -112,11 +116,11 @@ export default class App extends React.Component {
     currentHour = new Date().getHours();
     currentMinute = new Date().getMinutes();
     if(gender == "male"){
-      bac = ((totalcount*14)/(weight*494*0.68) *100) - 0.015*((currentHour - startHour) + (currentMinute - startMinute)/60);
+      bac = (((totalcount*14)/(weight*494*0.68) *100) - 0.015*((currentHour - startHour) + (currentMinute - startMinute)/60)) * 100;
     }else{
-      bac = ((totalcount*14)/(weight*494*0.55) *100) - 0.015*((currentHour - startHour) + (currentMinute - startMinute)/60);
+      bac = (((totalcount*14)/(weight*494*0.55) *100) - 0.015*((currentHour - startHour) + (currentMinute - startMinute)/60)) * 100;
     }
-    if(bac > 0.4){
+    if(bac > 40){
       Vibration.vibrate([1*100], true)
       Alert.alert(
         "WARNING",
@@ -129,7 +133,7 @@ export default class App extends React.Component {
           { text: "I WILL NOT DRINK", onPress: () => this.okayPress() }
         ]
       );
-    }else if(bac > 0.3){
+    }else if(bac > 30){
       Vibration.vibrate([1*100], true)
       Alert.alert(
         "WARNING",
@@ -203,10 +207,6 @@ export default class App extends React.Component {
       startHour = new Date().getHours();
       startMinute = new Date().getMinutes();
       startSeconds = new Date().getSeconds();
-    }else{
-      recentHour = new Date().getHours();
-      recentMinute = new Date().getMinutes();
-      recentSeconds = new Date().getSeconds();
     }
     drinks = drinks.map((drink) => {
       if(drink.id == item.id) {
@@ -217,6 +217,7 @@ export default class App extends React.Component {
     })
     this.drinkWarning();
     this.setState({drinks, 
+                  drinking: true,
                   startHour,
                   startMinute,
                   startSeconds,
@@ -224,7 +225,68 @@ export default class App extends React.Component {
                   recentMinute,
                   recentSeconds});
   }
-  
+  updateRecent = (item) => {
+    /*
+    this.state.recentSeconds = 0;
+    this.state.recentMinutes = 0;
+    this.state.recentHour = 0;
+    let timer = setInterval(() => {
+ 
+      var num = this.state.recentSeconds + 1,
+        count = this.state.recentMinute;
+        hour = this.state.recentHour;
+      if (this.state.recentSeconds == 59) {
+        count = (this.state.recentMinute) + 1;
+        num = 0;
+      }
+      if (this.state.recentMinute == 59) {
+        hour = (this.state.recentHour) + 1;
+        count = 0;
+      }
+ 
+      this.setState({
+        recentMinute: count,
+        recentSeconds: num,
+        recentHour: hour
+      });
+    }, 1000);
+    this.setState({ timer });*/
+    clearInterval(this.state.timer);
+    this.setState(
+      {recentHour: 0,
+       recentMinute: 0,
+       recentSeconds: 0
+      } 
+    ) 
+    console.log("New Drink Timer");
+    /*
+    this.state.recentSeconds = 0;
+    this.state.recentMinutes = 0;
+    this.state.recentHour = 0;*/
+    let timer = setInterval(() => {
+      var sec = this.state.recentSeconds + 1,
+        count = this.state.recentMinute;
+        hourCount = this.state.recentHour;
+      if (sec == 59) {
+        count = (count + 1);
+        sec =  0;
+      };
+      if (count == 59) {
+        hourCount = (hourCount + 1);
+        count = 0;
+      };
+      this.setState(
+        {recentHour: hourCount,
+         recentMinute: count,
+         recentSeconds: sec
+        } 
+      )  
+      }, 1000);
+      this.setState(
+        {timer}
+      )
+    }
+    
   render(){
     //'andriod'
     const statusbar = (Platform.OS == 'ios') ? <View style={styles.statusbar}></View> : <View></View>;
@@ -232,7 +294,7 @@ export default class App extends React.Component {
       <View style={styles.container}>
         {statusbar}
         <Header title="Beer Buddy"/>
-        {this.state.weight == 0.1 ? <InputBar 
+        {this.state.weight == 100.55 ? <InputBar 
           addWeight={() => this.addWeight()}
           textChange={weightInput => this.setState({ weightInput })}
           weightInput={this.state.weightInput}/> : null}
@@ -245,15 +307,15 @@ export default class App extends React.Component {
           keyExtractor={(item, index) => index.toString()}
           renderItem={({item,index}) => {
             return (
-              <DrinkList DrinkList={item} addDrink={() => this.addDrink(item)} />
+              <DrinkList /*onPress={this.updateRecent()} */DrinkList={item} addDrink={() => this.addDrink(item)} updateRecent={() => this.updateRecent(item)} />
             )
           } }
 
         />
         <Text style={styles.counter}>{this.state.totalcount}</Text>
-        <Text style={styles.time}>First Drink Start: {this.state.startHour}h, {this.state.startMinute}m, and {this.state.startSeconds}s</Text>
-        <Text style={styles.time}>Most Recent Drink: {this.state.recentHour}h, {this.state.recentMinute}m, and {this.state.recentSeconds}s</Text>
-        <Text style={styles.time}>Current BAC: {this.state.bac}</Text>
+        <Text style={styles.time}>Time Since First Drink: {this.state.timeSinceHour}h, {this.state.timeSinceMinute}m, and {this.state.timeSinceSeconds}s</Text>
+        <Text style={styles.time}>Time Since Last Drink: {this.state.recentHour}h, {this.state.recentMinute}m, and {this.state.recentSeconds}s</Text>
+        <Text style={styles.time}>Current BAC: {Math.round(this.state.bac*100)/100}%</Text>
       </View>
     );
   }

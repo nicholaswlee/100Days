@@ -11,7 +11,8 @@ export default class DrinkList extends React.Component {
             
             <TouchableOpacity 
                 style={styles.todoItem}
-                onPress={() => this.props.addDrink()}
+                onPress={() => {this.props.addDrink(); this.props.updateRecent()}}
+
                 /*onPress={() => this.props.drinkWarning()}
         */
             >
