@@ -13,10 +13,12 @@ export default function App() {
   }*/
 import React from 'react';
 import {Platform, FlatList, StyleSheet, Text, View, Alert, Vibration} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from './components/Header';
 import InputBar from './components/inputBar';
 import DrinkList from './components/DrinkList';
 import GenderButton from './components/GenderButton';
+import ResetButton from './components/ResetButton';
 export default class App extends React.Component {
   //Constructors run as soon as the app is loaded
   constructor() {
@@ -39,6 +41,7 @@ export default class App extends React.Component {
       bac: 0,
       weight: 100.55,
       weightInput: '',
+      name: '',
       gender: '',
       startHour: 0,
       startMinute: 0,
@@ -60,6 +63,8 @@ export default class App extends React.Component {
   }
 
   componentDidMount(){ 
+    this.getMyWeight();
+    this.getMyGender();
     setInterval(() => {
       if(this.state.drinking){
         var sec = (Number(this.state.timeSinceSeconds) + 1),
@@ -82,12 +87,52 @@ export default class App extends React.Component {
         )  
       }}, 1000);
   }
+  getMyWeight = async () => {
+    var weight;
+    try {
+       weight = await AsyncStorage.getItem('@USER_WEIGHT');
+       console.log(weight);
+    } catch(e) {
+      console.log("No existing weight");
+    }
+    if(weight == null){
+      this.setState({weight: 100.55})
+    }else{
+      this.setState({weight: weight})
+    }
+    
+
+  
+    console.log('Done.')
+  
+  }
+  getMyGender = async () => {
+    var gender;
+    try {
+       gender = await AsyncStorage.getItem('@USER_GENDER');
+       console.log(gender);
+    } catch(e) {
+      console.log("No existing gender");
+    }
+    if((gender == '') || (gender ==null)){
+      this.setState({gender: ''})
+      console.log("No existing gender");
+    }else{
+      this.setState({gender: gender})
+    }
+    
+
+  
+    console.log('Done.')
+  
+  }
   genderMale(){
     let gender = this.state.gender;
     gender = "male";
     this.setState({
       gender
     });
+    this.setGender(gender);
   }
   genderFemale(){
     let gender = this.state.gender;
@@ -95,14 +140,18 @@ export default class App extends React.Component {
     this.setState({
       gender
     });
+    this.setGender(gender);
   }
   addWeight(){
     let weight = this.state.weight;
     weight = Number(this.state.weightInput);
+
     this.setState({
       weight,
       weightInput: ''
     });
+    console.log(this.state.weight);
+    this.setWeight(weight);
   }
   drinkWarning(){
     let totalcount = this.state.totalcount;
@@ -215,6 +264,76 @@ export default class App extends React.Component {
                   recentMinute,
                   recentSeconds});
   }
+  setWeight = async (w) => {
+    try {
+      await AsyncStorage.setItem('@USER_WEIGHT', JSON.stringify(w))
+      const current_weight = await AsyncStorage.getItem('@USER_WEIGHT')
+      console.log(current_weight)
+    } catch(e){
+        console.log("ERROR COULD NOT SET WEIGHT");
+    }
+    let keys = []
+    try {
+      keys = await AsyncStorage.getAllKeys()
+    } catch(e) {
+      // read key error
+    }
+  
+    console.log(keys)
+  }
+  setGender = async (g) => {
+    try {
+      await AsyncStorage.setItem('@USER_GENDER', JSON.stringify(g))
+      const current_weight = await AsyncStorage.getItem('@USER_GENDER')
+      console.log(current_weight)
+    } catch(e){
+        console.log("ERROR COULD NOT SET GENDER");
+    }
+    let keys = []
+    try {
+      keys = await AsyncStorage.getAllKeys()
+    } catch(e) {
+      // read key error
+    }
+  
+    console.log(keys)
+  }
+  resetWeight = async () => {
+    try {
+      await AsyncStorage.removeItem('@USER_WEIGHT')
+    } catch(e) {
+      console.log("ERROR COULD NOT REMOVE WEIGHT");
+    }
+  
+    console.log('Weight Reset');
+    let keys = []
+    try {
+      keys = await AsyncStorage.getAllKeys()
+    } catch(e) {
+      // read key error
+    }
+  
+    console.log(keys)
+    this.setState({weight: 100.55});
+  }
+  resetGender = async () => {
+    try {
+      await AsyncStorage.removeItem('@USER_GENDER')
+    } catch(e) {
+      console.log("ERROR COULD NOT REMOVE GENDER");
+    }
+    
+    console.log('Gender Reset');
+    let keys = []
+    try {
+      keys = await AsyncStorage.getAllKeys()
+    } catch(e) {
+      // read key error
+    }
+  
+    console.log(keys)
+    this.setState({gender: ''});
+  }
   updateRecent = (item) => {
     clearInterval(this.state.timer);
     this.setState(
@@ -246,7 +365,8 @@ export default class App extends React.Component {
       this.setState(
         {timer}
       )
-    }
+  }
+  
     
   render(){
     //'andriod'
@@ -258,7 +378,7 @@ export default class App extends React.Component {
         {this.state.weight == 100.55 ? <InputBar 
           addWeight={() => this.addWeight()}
           textChange={weightInput => this.setState({ weightInput })}
-          weightInput={this.state.weightInput}/> : null}
+          weightInput={this.state.weightInput}/> : (this.state.gender == '' ? null : <ResetButton resetWeight={()=> this.resetWeight()} resetGender={()=> this.resetGender()}/>)}
         {this.state.gender == ''? <GenderButton genderMale={() => this.genderMale()} genderFemale={() => this.genderFemale()}/>: null}
         <FlatList
           color={(this.state.overCapacity) ? '#FF0000' : '#FF0000'}
@@ -277,6 +397,8 @@ export default class App extends React.Component {
         <Text style={styles.time}>Time Since First Drink: {this.state.timeSinceHour}h, {this.state.timeSinceMinute}m, and {this.state.timeSinceSeconds}s</Text>
         <Text style={styles.time}>Time Since Last Drink: {this.state.recentHour}h, {this.state.recentMinute}m, and {this.state.recentSeconds}s</Text>
         <Text style={styles.time}>Current BAC: {Math.round(this.state.bac*100)/100}%</Text>
+        <Text style={styles.time}>Current Weight: {Math.round(this.state.weight)}</Text>
+        <Text style={styles.time}>Current Gender: {this.state.gender}</Text>
       </View>
     );
   }
