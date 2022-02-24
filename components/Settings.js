@@ -53,7 +53,6 @@ export default class Settings extends React.Component {
         var gender;
         try {
            gender = await AsyncStorage.getItem('@USER_GENDER');
-           console.log(gender);
         } catch(e) {
           console.log("No existing gender");
         }
@@ -63,17 +62,12 @@ export default class Settings extends React.Component {
         }else{
           this.setState({gender: gender})
         }
-        
-    
-      
-        console.log('Done.')
       
       }
       getMyName = async () => {
         var name;
         try {
            name = await AsyncStorage.getItem('@USER_NAME');
-           console.log(name);
         } catch(e) {
           console.log("No existing name");
         }
@@ -83,17 +77,11 @@ export default class Settings extends React.Component {
         }else{
           this.setState({name: name})
         }
-        
-    
-      
-        console.log('Done.')
-      
       }
       getMyAge = async () => {
         var age;
         try {
           age = await AsyncStorage.getItem('@USER_AGE');
-           console.log(age);
         } catch(e) {
           console.log("No existing age");
         }
@@ -103,11 +91,6 @@ export default class Settings extends React.Component {
         }else{
           this.setState({age: age})
         }
-        
-    
-      
-        console.log('Done.')
-      
       }
       genderMale(){
         let gender = this.state.gender;
@@ -341,7 +324,7 @@ export default class Settings extends React.Component {
                 </TouchableOpacity> 
               </View>  : 
               <View style={styles.inputContainer}> 
-                <Text style={styles.data}>Name: {this.state.name}</Text>
+                <Text style={styles.data}>Name: {this.state.name.replace(/['"]+/g, '')}</Text>
                 <ResetName resetName={()=> this.resetName()}/>     
               </View>}
               {this.state.age == -1 ?  
@@ -393,7 +376,7 @@ export default class Settings extends React.Component {
               <GenderButton genderMale={() => this.genderMale()} genderFemale={() => this.genderFemale()}/>
             :
             <View style={styles.inputContainer}>
-              <Text style={styles.data}>Sex: {this.state.gender}</Text>
+              <Text style={styles.data}>Sex: {this.state.gender.replace(/['"]+/g, '')}</Text>
               <ResetGender resetGender={()=> this.resetGender()}/>
             </View>}
         </View>

@@ -72,7 +72,7 @@ export default class BacPage extends React.Component {
             {timeSinceHour: hourCount,
             timeSinceMinute: count,
             timeSinceSeconds: sec,
-            bac: (this.state.gender== ("male")) ?  (((this.state.totalcount*14)/(this.state.weight*494*0.68) *100) - 0.015*((this.state.timeSinceHour) + ((this.state.timeSinceMinute)/60)))*100 : (((this.state.totalcount*14)/(this.state.weight*494*0.55) *100) - 0.015*((this.state.timeSinceHour) + ((this.state.timeSinceMinute)/60)))*100
+            bac: (this.state.gender== ("male")) ?  (((this.state.totalcount*14)/(this.state.weight*494*0.68))*100  - 0.015*((this.state.timeSinceHour) + ((this.state.timeSinceMinute)/60))) : (((this.state.totalcount*14)/(this.state.weight*494*0.55))*100  - 0.015*((this.state.timeSinceHour) + ((this.state.timeSinceMinute)/60)))
             } 
           )  
         }}, 1000);
@@ -81,26 +81,19 @@ export default class BacPage extends React.Component {
       var weight;
       try {
          weight = await AsyncStorage.getItem('@USER_WEIGHT');
-         //console.log(weight);
       } catch(e) {
-        //console.log("No existing weight");
+        console.log("No existing weight");
       }
       if(weight == null){
         this.setState({weight: 100.55})
       }else{
         this.setState({weight: weight})
-      }
-      
-  
-    
-      //console.log('Done.')
-    
+      } 
     }
     getMyGender = async () => {
       var gender;
       try {
          gender = await AsyncStorage.getItem('@USER_GENDER');
-         //console.log(gender);
       } catch(e) {
         //console.log("No existing gender");
       }
@@ -109,12 +102,7 @@ export default class BacPage extends React.Component {
         //console.log("No existing gender");
       }else{
         this.setState({gender: gender})
-      }
-      
-  
-    
-      //console.log('Done.')
-    
+      }    
     }
     genderMale(){
       let gender = this.state.gender;
@@ -155,11 +143,11 @@ export default class BacPage extends React.Component {
       currentHour = new Date().getHours();
       currentMinute = new Date().getMinutes();
       if(gender == "male"){
-        bac = (((totalcount*14)/(weight*494*0.68) *100) - 0.015*((currentHour - startHour) + (currentMinute - startMinute)/60)) * 100;
+        bac = (((totalcount*14)/(weight*494*0.68))*100 - 0.015*((currentHour - startHour) + (currentMinute - startMinute)/60));
       }else{
-        bac = (((totalcount*14)/(weight*494*0.55) *100) - 0.015*((currentHour - startHour) + (currentMinute - startMinute)/60)) * 100;
+        bac = (((totalcount*14)/(weight*494*0.55))*100 - 0.015*((currentHour - startHour) + (currentMinute - startMinute)/60));
       }
-      if(bac > 40){
+      if(bac > .40){
         Vibration.vibrate([1*100], true)
         Alert.alert(
           "WARNING",
@@ -172,7 +160,7 @@ export default class BacPage extends React.Component {
             { text: "I WILL NOT DRINK", onPress: () => this.okayPress() }
           ]
         );
-      }else if(bac > 30){
+      }else if(bac > .30){
         Vibration.vibrate([1*100], true)
         Alert.alert(
           "WARNING",
@@ -399,7 +387,7 @@ export default class BacPage extends React.Component {
           <Text style={styles.counter}>{this.state.totalcount}</Text>
           <Text style={styles.time}>Time Since First Drink: {this.state.timeSinceHour}h, {this.state.timeSinceMinute}m, and {this.state.timeSinceSeconds}s</Text>
           <Text style={styles.time}>Time Since Last Drink: {this.state.recentHour}h, {this.state.recentMinute}m, and {this.state.recentSeconds}s</Text>
-          <Text style={styles.time}>Current BAC: {Math.round(this.state.bac*100)/100}%</Text>
+          <Text style={styles.time}>Current BAC: {Math.round(this.state.bac*100000)/100000}%</Text>
         </View>
       );
     }
