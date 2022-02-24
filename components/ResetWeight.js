@@ -1,17 +1,11 @@
 import React from 'react';
-import {StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
+import {StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 
-const InputBar = (props) => {
+const ResetWeight = (props) => {
     return (
-        <View style={styles.inputContainer}>
-            <TextInput 
-                style={styles.input}
-                onChangeText={(weightInput) => props.textChange(weightInput)}
-                value={props.weightInput}
-            />
-                
-            <TouchableOpacity style={styles.addButton} onPress={() => {props.addWeight()}}>
-                <Text style={styles.addButtonText}>Add Weight</Text>
+        <View style={styles.inputContainer}>                
+            <TouchableOpacity style={styles.addButton} onPress={() => {props.resetWeight()}}>
+                <Text style={styles.addButtonText}>Reset</Text>
             </TouchableOpacity>
         </View>
     )
@@ -44,4 +38,4 @@ const styles = StyleSheet.create({
     }
 })
 
-export default InputBar;
+export default ResetWeight;
