@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Platform, FlatList, StyleSheet, Text, View, Alert, Vibration, TextInput, TouchableOpacity} from 'react-native';
+import {Platform, FlatList, StyleSheet, Text, View, Alert, Vibration, TextInput, TouchableOpacity, Dimensions} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from './Header';
 import GenderButton from './GenderButton';
@@ -21,22 +21,59 @@ export default class Settings extends React.Component {
             nameInput: '',
             gender: '',
             age: -1,
-            ageInput: ''
+            ageInput: '',
+            drinkingStatus: 'true',
+            reset: 'false'
         }
     }
-    componentDidMount(){ 
+    componentDidMount(){
+        this.resetDrinkingStatus();
+        this.resetReset();
+        this.getDrinkingStatus();
         setInterval(() => {
+            /*console.log("WACK");
+            console.log(this.drinkingStatus);
+            console.log("WACK");*/
+            this.getReset();
             this.getMyWeight();
             this.getMyGender();
             this.getMyAge();
             this.getMyName();
+            this.getDrinkingStatus();
         },1000)
+    }
+    getDrinkingStatus = async () => {
+      var status;
+        try {
+           status = await AsyncStorage.getItem('@DRINKING_STATUS');
+        } catch(e) {
+          console.log("No existing status");
+        }
+        if((status === '') || (status ==null)){
+          this.setState({drinkingStatus: 'true'});
+        }else{
+          this.setState({drinkingStatus: status});
+        }
+        
+    }
+    getReset = async () => {
+      var status;
+        try {
+           status = await AsyncStorage.getItem('@RESET_STATUS');
+        } catch(e) {
+          console.log("No existing status");
+        }
+        if((status === '') || (status ==null)){
+          this.setState({reset: 'false'});
+        }else{
+          this.setState({reset: status});
+        }
+        
     }
     getMyWeight = async () => {
         var weight;
         try {
            weight = await AsyncStorage.getItem('@USER_WEIGHT');
-           console.log(weight);
         } catch(e) {
           console.log("No existing weight");
         }
@@ -45,9 +82,6 @@ export default class Settings extends React.Component {
         }else{
           this.setState({weight: weight})
         }
-        
-        console.log('Done.')
-      
       }
       getMyGender = async () => {
         var gender;
@@ -159,6 +193,40 @@ export default class Settings extends React.Component {
       
         console.log(keys)
       }
+      setDrinkingStatus = async (s) => {
+        try {
+          await AsyncStorage.setItem('@DRINKING_STATUS', JSON.stringify(s))
+          const status = await AsyncStorage.getItem('@DRINKING_STATUS')
+          console.log(status)
+        } catch(e){
+            console.log("ERROR COULD NOT SET DRINKING STATUS");
+        }
+        let keys = [];
+        try {
+          keys = await AsyncStorage.getAllKeys()
+        } catch(e) {
+          // read key error
+        }
+
+        console.log(keys);
+      }
+      setReset = async (s) => {
+        try {
+          await AsyncStorage.setItem('@RESET_STATUS', JSON.stringify(s))
+          const status = await AsyncStorage.getItem('@RESET_STATUS')
+          console.log(status)
+        } catch(e){
+            console.log("ERROR COULD NOT SET RESET STATUS");
+        }
+        let keys = [];
+        try {
+          keys = await AsyncStorage.getAllKeys()
+        } catch(e) {
+          // read key error
+        }
+
+        console.log(keys);
+      }
       setAge = async (a) => {
         this.resetAge();
         try {
@@ -246,14 +314,14 @@ export default class Settings extends React.Component {
           // read key error
         }
     }
-    resetWeight = async () => {
+    resetDrinkingStatus = async () => {
       try {
-        await AsyncStorage.removeItem('@USER_WEIGHT')
+        await AsyncStorage.removeItem('@DRINKING_STATUS')
       } catch(e) {
-        console.log("ERROR COULD NOT REMOVE WEIGHT");
+        console.log("ERROR COULD NOT REMOVE DRINKING STATUS");
       }
     
-      console.log('Weight Reset');
+      console.log('Drinking Status Reset');
       let keys = []
       try {
         keys = await AsyncStorage.getAllKeys()
@@ -262,8 +330,25 @@ export default class Settings extends React.Component {
       }
     
       console.log(keys)
-      this.setState({weight: 100.55});
+      this.setState({drinkingStatus: 'true'}); 
+    }
+    resetReset = async () => {
+      try {
+        await AsyncStorage.removeItem('@RESET_STATUS')
+      } catch(e) {
+        console.log("ERROR COULD NOT REMOVE RESET STATUS");
+      }
     
+      console.log('Reset Status Reset');
+      let keys = []
+      try {
+        keys = await AsyncStorage.getAllKeys()
+      } catch(e) {
+        // read key error
+      }
+    
+      console.log(keys)
+      this.setState({reset: 'false'}); 
     }
     resetName = async () => {
       try {
@@ -307,7 +392,7 @@ export default class Settings extends React.Component {
             <View style={styles.container}>
                 {statusbar}
             
-            <Header title="Beer Buddy"/>
+            <Header title="drink.me"/>
             <View style={styles.inputContainer}> 
               <Text style={styles.title}>User Data</Text>
             </View>
@@ -379,12 +464,34 @@ export default class Settings extends React.Component {
               <Text style={styles.data}>Sex: {this.state.gender.replace(/['"]+/g, '')}</Text>
               <ResetGender resetGender={()=> this.resetGender()}/>
             </View>}
+            <View style={styles.viewSpace}></View>
+            {this.state.drinkingStatus == 'true' ?
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity style={[styles.doneButton, {backgroundColor: '#e52736'}]} onPress={() => this.setDrinkingStatus('false')} >
+                <Text style={styles.doneButtonText}>STOP DRINKING</Text>
+              </TouchableOpacity>
+            </View> :
+            <View style={[styles.buttonContainer]}>
+            <TouchableOpacity style={[styles.doneButton, {backgroundColor: '#0fad1f'}]} onPress={() => {this.resetDrinkingStatus(); this.setReset('true')}} >
+              <Text style={styles.doneButtonText}>RESET DRINKING</Text>
+            </TouchableOpacity>
+          </View>}
         </View>
         )
     }
 }
 
 const styles = StyleSheet.create({
+    doneButtonText: {
+      color: '#171717',
+      fontSize: 30,
+      fontWeight: '700',
+      shadowOffset: { width: 0, height: 3 },
+      /*
+      shadowColor: '#171717',
+      shadowOpacity: .1,
+      backgroundColor: '#F3F3F3'*/
+    },
     title: {
       backgroundColor: '#f3f3f3',
       textAlign: 'center',
@@ -394,6 +501,26 @@ const styles = StyleSheet.create({
       fontWeight: 'bold',
       borderBottomColor: '#000000',
       borderBottomWidth: 5  
+    },
+    doneButton: {
+      width: (Dimensions.get('window').width)/1.25,
+      backgroundColor: '#F3F3F3',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderColor: '#000000',
+      borderWidth: 1,
+      borderRadius: 20
+    },
+    buttonContainer: {
+      //flex: 1,
+      
+      flexDirection: 'row',
+      height: (Dimensions.get('window').width)/4,
+      justifyContent: 'space-evenly',
+      /*
+      shadowOffset: { width: 0, height: 3 },
+      shadowColor: '#171717',
+      shadowOpacity: .1*/
     },
     data: {
       backgroundColor: '#f3f3f3',
@@ -433,11 +560,13 @@ const styles = StyleSheet.create({
         width: 100,
         backgroundColor: '#FFCE00',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        borderColor: '#000000',
+        borderWidth: 1
     },
     addButtonText: {
         color: '#171717',
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: '700'
     },
     container: {
@@ -452,6 +581,10 @@ const styles = StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: '#F3F3F3',
+    },
+    viewSpace:{
+      flexDirection: 'row',
+      height: (Dimensions.get('window').width)*0.25
     },
     statusbar: {
       backgroundColor: "#171717",

@@ -30,11 +30,14 @@ const styles = StyleSheet.create({
         width: 100,
         backgroundColor: '#FFCE00',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        borderColor: '#000000',
+        borderWidth: 1
+    
     },
     addButtonText: {
         color: '#171717',
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: '700'
     }
 })

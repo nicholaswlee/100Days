@@ -1,16 +1,3 @@
-/*
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-
-export default function App() {
-  
-  constructor () {
-    super();
-    this.state = {
-      todoInput: '',
-
-    }
-  }*/
 import * as React from 'react';
 
 import {Platform, FlatList, StyleSheet, Text, View, Alert, Vibration} from 'react-native';
@@ -26,10 +13,15 @@ import Settings from './components/Settings';
 import { Ionicons } from '@expo/vector-icons';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import DrinkLocation from './components/DrinkLocation';
 
 
 
-
+function MapScreen(){
+  return(
+    <DrinkLocation/>
+  )
+}
 function SettingsScreen() {
   return (
    <Settings/>
@@ -74,6 +66,18 @@ export default function App() {
                   color={color}
                 />
               );
+            } else if (route.name === 'Maps'){
+              return(
+                <Ionicons
+                name={
+                  focused
+                    ? 'ios-navigate'
+                    : 'ios-navigate-outline'
+                }
+                  size={size}
+                  color={color}
+                /> 
+              );
             }
           },
           tabBarInactiveTintColor: 'gray',
@@ -87,6 +91,7 @@ export default function App() {
           options={{ headerShown: false }}
           //options={{ tabBarBadge: 3 }}
         />
+        <Tab.Screen name="Maps" component={MapScreen} options={{ headerShown: false }}/>
         <Tab.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false }}/>
       </Tab.Navigator>
     </NavigationContainer>
