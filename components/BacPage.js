@@ -82,7 +82,8 @@ export default class BacPage extends React.Component {
             timeSinceSeconds: sec,
             bac: (this.state.gender== ("male")) ?  (((this.state.totalcount*14)/(this.state.weight*494*0.68))*100  - 0.015*((this.state.timeSinceHour) + ((this.state.timeSinceMinute)/60))) : (((this.state.totalcount*14)/(this.state.weight*494*0.55))*100  - 0.015*((this.state.timeSinceHour) + ((this.state.timeSinceMinute)/60)))
             } 
-          )  
+          ) 
+          this.drinkingStatus(); 
         }}, 1000);
     }
     drinkingStatus(){
