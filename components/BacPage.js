@@ -217,13 +217,6 @@ export default class BacPage extends React.Component {
       let currentMinute = this.state.currentMinute;
       let gender = this.state.gender;
       let weight = this.state.weight;
-      currentHour = new Date().getHours();
-      currentMinute = new Date().getMinutes();
-      if(gender == "male"){
-        bac = (((totalcount*14)/(weight*494*0.68))*100 - 0.015*((currentHour - startHour) + (currentMinute - startMinute)/60));
-      }else{
-        bac = (((totalcount*14)/(weight*494*0.55))*100 - 0.015*((currentHour - startHour) + (currentMinute - startMinute)/60));
-      }
       if(bac > .40){
         Vibration.vibrate([1*100], true)
         Alert.alert(

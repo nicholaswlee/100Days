@@ -14,9 +14,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import DrinkLocation from './components/DrinkLocation';
+import Friends from './components/Friends';
+import Home from './components/Home';
 
 
-
+function HomeScreen(){
+  return(
+    <Home/>
+  )
+}
 function MapScreen(){
   return(
     <DrinkLocation/>
@@ -26,6 +32,11 @@ function SettingsScreen() {
   return (
    <Settings/>
   );
+}
+function FriendsScreen(){
+  return(
+    <Friends/>
+  )
 }
 function BacHome(){
   return (
@@ -40,6 +51,7 @@ export default function App() {
     <NavigationContainer>
       <Tab.Navigator 
         screenOptions={{headerShown:false}}
+        tabBarOptions={{ showLabel: false }}
         screenOptions={({ route }) => ({
           tabBarIcon: ({ focused, color, size }) => {
             if (route.name === 'BacPage') {
@@ -47,9 +59,33 @@ export default function App() {
                 <Ionicons
                   name={
                     focused
-                      ? 'ios-home'
-                      : 'ios-home-outline'
+                      ? 'ios-beer'
+                      : 'ios-beer-outline'
                   }
+                  size={size}
+                  color={color}
+                />
+              );
+            } else if (route.name === 'Friends') {
+              return (
+                <Ionicons
+                name={
+                  focused
+                    ? 'ios-people-circle'
+                    : 'ios-people-circle-outline'
+                }
+                  size={size}
+                  color={color}
+                />
+              );
+            }else if (route.name === 'Home') {
+              return (
+                <Ionicons
+                name={
+                  focused
+                    ? 'ios-home'
+                    : 'ios-home-outline'
+                }
                   size={size}
                   color={color}
                 />
@@ -85,14 +121,17 @@ export default function App() {
         })}
       >
         
+        <Tab.Screen name="Home" component={HomeScreen} options={{tabBarShowLabel: false}, { headerShown: false }}/>
+        <Tab.Screen name="Maps" component={MapScreen} options={{ headerShown: false }}/>
         <Tab.Screen
           name="BacPage"
           component={BacHome}
           options={{ headerShown: false }}
           //options={{ tabBarBadge: 3 }}
         />
-        <Tab.Screen name="Maps" component={MapScreen} options={{ headerShown: false }}/>
+        <Tab.Screen name="Friends" component={FriendsScreen} options={{ headerShown: false }}/>
         <Tab.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false }}/>
+        
       </Tab.Navigator>
     </NavigationContainer>
   );
