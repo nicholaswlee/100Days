@@ -1,5 +1,6 @@
 import * as React from 'react';
-import {Platform, FlatList, StyleSheet, Text, View, Alert, Vibration, TextInput, TouchableOpacity, Dimensions} from 'react-native';
+import {useState} from 'react';
+import {Platform, FlatList, StyleSheet, Text, Modal, View, Alert, Vibration, TextInput, TouchableOpacity, Dimensions} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from './Header';
 import GenderButton from './GenderButton';
@@ -23,13 +24,40 @@ export default class Settings extends React.Component {
             age: -1,
             ageInput: '',
             drinkingStatus: 'true',
-            reset: 'false'
+            reset: 'false',
+            newUser: false,
+            sexSet: false
         }
     }
     componentDidMount(){
         this.resetDrinkingStatus();
         this.resetReset();
         this.getDrinkingStatus();
+        this.getReset();
+        this.getMyWeight();
+        this.getMyGender();
+        this.getMyAge();
+        this.getMyName();
+        this.getDrinkingStatus();
+        setTimeout(() =>{
+          if( this.state.name == '' &&
+              this.state.gender == '' &&
+              this.state.age == -1 &&
+              this.state.weight == 100.55
+          ){
+            this.setState({newUser: true})
+          }else{
+            this.setState({newUser: false})
+          }
+          
+        }, 500);
+        setTimeout(() =>{
+          if (this.state.gender == ''){
+            this.setState({sexSet: true})
+          }else{
+            this.setState({sexSet: false})
+          }
+        }, 600);
         setInterval(() => {
             /*console.log("WACK");
             console.log(this.drinkingStatus);
@@ -40,6 +68,14 @@ export default class Settings extends React.Component {
             this.getMyAge();
             this.getMyName();
             this.getDrinkingStatus();
+            if( this.state.name != '' &&
+              this.state.gender != '' &&
+              this.state.age != -1 &&
+              this.state.weight != 100.55
+            ){
+            this.setState({newUser: false})
+            }
+
         },1000)
     }
     getDrinkingStatus = async () => {
@@ -129,6 +165,14 @@ export default class Settings extends React.Component {
       genderMale(){
         let gender = this.state.gender;
         gender = "male";
+        this.setState({
+          gender
+        });
+        this.setGender(gender);
+      }
+      genderIntersex(){
+        let gender = this.state.gender;
+        gender = "intersex";
         this.setState({
           gender
         });
@@ -396,6 +440,82 @@ export default class Settings extends React.Component {
             <View style={styles.inputContainer}> 
               <Text style={styles.title}>User Data</Text>
             </View>
+            <Modal 
+                animationType="slide"
+                transparent={true}
+                visible = {this.state.newUser}
+                backdropOpacity={0.3}
+                >
+                <View style={styles.centeredView}>
+                <View style={styles.profile}>
+                <Text style={[{fontSize: 24}]}>Welcome to Drink.Me</Text>
+                <Text style={[{fontSize: 24}]}>Please fill out some info</Text>
+                    {this.state.name == '' ?  
+                  <View style={styles.inputContainer}> 
+                    <TextInput 
+                      style={styles.input}
+                      placeholder = "Enter Name Here"
+                      onChangeText={nameInput => this.setState({nameInput})}
+                      value={this.state.nameInput}
+                    />
+                    <TouchableOpacity style={styles.addButton} onPress={() => {this.addName()}}>
+                      <Text style={styles.addButtonText}>Add Name</Text>
+                    </TouchableOpacity> 
+                  </View>  : 
+                  <View style={styles.inputContainer}> 
+                    <Text style={styles.data}>Name: {this.state.name.replace(/['"]+/g, '')}</Text>
+                    <ResetName resetName={()=> this.resetName()}/>     
+                  </View>}
+                  {this.state.age == -1 ?  
+                  <View style={styles.inputContainer}> 
+                    <TextInput 
+                      style={styles.input}
+                      placeholder = "Enter Age Here"
+                      onChangeText={ageInput => this.setState({ageInput})}
+                      value={this.state.ageInput}
+                    />
+                    <TouchableOpacity style={styles.addButton} onPress={() => {this.addAge()}}>
+                      <Text style={styles.addButtonText}>Add Age</Text>
+                    </TouchableOpacity> 
+                  </View>  : 
+                  <View style={styles.inputContainer}> 
+                    <Text style={styles.data}>Age: {this.state.age}</Text>
+                    <ResetWeight resetWeight={()=> this.resetAge()}/>     
+                  </View>}
+                  {this.state.weight == 100.55 ?  
+                  <View style={styles.inputContainer}> 
+                    <TextInput 
+                      style={styles.input}
+                      placeholder = "Enter Weight Here"
+                      onChangeText={weightInput => this.setState({weightInput})}
+                      value={this.state.weightInput}
+                    />
+                    <TouchableOpacity style={styles.addButton} onPress={() => {this.addWeight()}}>
+                      <Text style={styles.addButtonText}>Add Weight</Text>
+                    </TouchableOpacity> 
+                  </View>  : 
+                  <View style={styles.inputContainer}> 
+                    <Text style={styles.data}>Weight: {this.state.weight}</Text>
+                    <ResetWeight resetWeight={()=> this.resetWeight()}/>     
+                  </View>}
+                    {(this.state.gender != '') ?
+                    <View style={styles.inputContainer}>
+                      <Text style={styles.data}>Sex: {this.state.gender.replace(/['"]+/g, '')}</Text>
+                      <ResetGender resetGender={()=> {this.resetGender(); this.setState({setSex: true})}}/>
+                    </View>:
+                    <><Text style={[{ fontSize: 24 }]}>What is your sex?</Text>
+                    <TouchableOpacity style={styles.addGender} onPress={() => this.genderMale()}>
+                      <Text style={styles.addButtonText}>Male</Text>
+                    </TouchableOpacity><TouchableOpacity style={styles.addGender} onPress={() => this.genderIntersex()}>
+                        <Text style={styles.addButtonText}>Intersex</Text>
+                      </TouchableOpacity><TouchableOpacity style={styles.addGender} onPress={() => this.genderFemale()}>
+                        <Text style={styles.addButtonText}>Female</Text>
+                      </TouchableOpacity></>
+                  }
+                </View>
+                </View>
+            </Modal>
+
               {this.state.name == '' ?  
               <View style={styles.inputContainer}> 
                 <TextInput 
@@ -456,14 +576,31 @@ export default class Settings extends React.Component {
                     <Text style={styles.addButtonText}>Add Weight</Text>
                 </TouchableOpacity>
             </View>*/}
-
-          {this.state.gender == '' ?  
-              <GenderButton genderMale={() => this.genderMale()} genderFemale={() => this.genderFemale()}/>
-            :
-            <View style={styles.inputContainer}>
+          <Modal 
+            animationType="slide"
+            transparent={true}
+            visible = {this.state.sexSet}
+            backdropOpacity={0.3}
+            >
+            <View style={styles.centeredView}>
+            <View style={styles.profile}>
+                <Text style={[{fontSize: 24}]}>What is your sex?</Text>
+                <TouchableOpacity style={styles.addGender} onPress={() => {this.genderMale(); this.setState({sexSet: false})}}>
+                    <Text style={styles.addButtonText}>Male</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.addGender} onPress={() => {this.genderIntersex(); this.setState({sexSet: false})}}>
+                    <Text style={styles.addButtonText}>Intersex</Text>
+                </TouchableOpacity>       
+                <TouchableOpacity style={styles.addGender} onPress={() => {this.genderFemale(); this.setState({sexSet: false})}}>
+                    <Text style={styles.addButtonText}>Female</Text>
+                </TouchableOpacity>
+            </View>
+            </View>
+        </Modal>
+          <View style={styles.inputContainer}>
               <Text style={styles.data}>Sex: {this.state.gender.replace(/['"]+/g, '')}</Text>
-              <ResetGender resetGender={()=> this.resetGender()}/>
-            </View>}
+              <ResetGender resetGender={()=> {this.resetGender(); this.setState({sexSet: true})}}/>
+          </View>
             <View style={styles.viewSpace}></View>
             {this.state.drinkingStatus == 'true' ?
             <View style={styles.buttonContainer}>
@@ -482,6 +619,41 @@ export default class Settings extends React.Component {
 }
 
 const styles = StyleSheet.create({
+    profile: {
+      flexDirection: 'column',
+      height: (Dimensions.get('window').width),
+      width: '75%',
+      justifyContent: "space-evenly",
+      alignItems: "center",
+      backgroundColor: '#EEEEEE',
+      borderColor: '#000000',
+      borderWidth: 0.5,
+      borderRadius: 10
+    },
+    data: {
+      backgroundColor: '#f3f3f3',
+      flex: 1,
+      fontSize: 30,
+      height: 36,
+      borderBottomColor: '#000000',
+      borderBottomWidth: 5
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 22
+      },
+      addGender: {
+        width: 100,
+        height: 50,
+        backgroundColor: '#FFCE00',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderColor: '#000000',
+        borderWidth: 1,
+        borderRadius: 5
+    },
     doneButtonText: {
       color: '#171717',
       fontSize: 30,

@@ -8,6 +8,7 @@ import ResetWeight from './ResetWeight';
 import ResetName from './ResetName';
 import BacPage from './BacPage';
 import { AlphabetList } from "react-native-section-alphabet-list";
+import FriendProfile from './FriendProfile';
 
 function compare(person1, person2) {
   const name1 = person1.value.toUpperCase();
@@ -37,23 +38,82 @@ export default class Friends extends React.Component {
             ageInput: '',
             drinkingStatus: 'true',
             reset: 'false',
+            emergencyContact: '',
             friends: [
-                {value: 'Alyssa', key: 'aan',age: 21},
-                {value: 'Anke', key: 'ahao',age: 21},
-                {value: 'Kaya', key: 'k', age: 21},
-                {value: 'Raghav', key: 'r', age: 21},
-                {value: 'Parnika', key: 'p', age: 21},
-                {value: 'Ethan', key: 'e', age: 21},
-                {value: 'Sanzhar', key: 'skhaidarov',age: 21},
-                {value: 'Tim', key: 'tpouring',age: 21},
-                {value: 'Nicholas', key: 'nlee', age: 21},
+                {value: 'Alyssa', key: 'aan',age: 21, bio: ''},
+                {value: 'Anke', key: 'ahao',age: 21, bio: ''},
+                {value: 'Kaya', key: 'k', age: 21, bio: ''},
+                {value: 'Raghav', key: 'r', age: 21, bio: ''},
+                {value: 'Parnika', key: 'p', age: 21, bio: ''},
+                {value: 'Ethan', key: 'e', age: 21, bio: ''},
+                {value: 'Sanzhar', key: 'skhaidarov',age: 21, bio: ''},
+                {value: 'Tim', key: 'tpouring',age: 21, bio: ''},
+                {value: 'Nicholas', key: 'nlee', age: 21, bio: ''},
             ]
         }
     }
     componentDidMount(){
         this.setState({friends: this.state.friends.sort(compare)})
         setInterval(() => {
+          this.getEmergencyContact()
         },1000)
+    }
+    getEmergencyContact = async () => {
+      var contact;
+        try {
+           contact = await AsyncStorage.getItem('@EMERGENCY_CONTACT');
+        } catch(e) {
+          console.log("No existing emergency contact");
+        }
+        if((contact == '') || (contact ==null)){
+          this.setState({emergencyContact: ''});
+          console.log("No existing contact");
+        }else{
+          this.setState({emergencyContact: contact});
+        }
+        
+    }
+    addEmergencyContact = (name) => {
+      this.setState({
+        emergencyContact: name
+      });
+      console.log(name);
+      this.setEmergencyContact(name);
+    }
+    setEmergencyContact = async (s) => {
+      try {
+        await AsyncStorage.setItem('@EMERGENCY_CONTACT', JSON.stringify(s))
+        const contact = await AsyncStorage.getItem('@EMERGENCY_CONTACT')
+        console.log(contact)
+      } catch(e){
+          console.log("ERROR COULD NOT SET EMERGENCY CONTACT");
+      }
+      let keys = [];
+      try {
+        keys = await AsyncStorage.getAllKeys()
+      } catch(e) {
+        // read key error
+      }
+
+      console.log(keys);
+    }
+    resetEmergencyContact = async () => {
+      try {
+        await AsyncStorage.removeItem('@EMERGENCY_CONTACT')
+      } catch(e) {
+        console.log("ERROR COULD NOT EMERGENCY CONTACT");
+      }
+    
+      console.log('Contact Reset');
+      let keys = []
+      try {
+        keys = await AsyncStorage.getAllKeys()
+      } catch(e) {
+        // read key error
+      }
+    
+      console.log(keys)
+      this.setState({weight: 100.55});
     }
     render(){
         const statusbar = (Platform.OS == 'ios') ? <View style={styles.statusbar}></View> : <View></View>;
@@ -89,7 +149,12 @@ export default class Friends extends React.Component {
                 }}
                 renderCustomItem={(item) => (
                   <View style={styles.inputContainer}>
-                    <Text style={styles.data}>{item.value}</Text>
+                    <FriendProfile
+                      name={item.value}
+                      bio={item.bio}
+                      contact={this.state.emergencyContact}
+                      setContact={this.addEmergencyContact}
+                    />
                   </View>
                 )}
                 renderCustomSectionHeader={(section) => (
