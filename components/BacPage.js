@@ -49,7 +49,8 @@ export default class BacPage extends React.Component {
         recentDrinking2: false,
         statusColor: '#0fad1f',
         status: 'sober',
-        drinkingStatus: 'true'
+        drinkingStatus: 'true',
+        callUber: 'false'
       }
     }
     
@@ -227,7 +228,9 @@ export default class BacPage extends React.Component {
               text: "Slowing Down",
               onPress: () => this.slowDownPress(),
             },*/
-            { text: "I WILL NOT DRINK", onPress: () => this.okayPress() }
+            { text: "I WILL NOT DRINK", onPress: () => this.okayPress() },
+            { text: "CALL ME AN UBER", onPress: () => {this.setDrinkingStatus('false'); 
+                                                        this.setState({callUber: 'true'}) }}
           ]
         );
       }else if(bac > .30){
@@ -556,7 +559,14 @@ export default class BacPage extends React.Component {
                       <Text role="img" style={styles.addButtonText} aria-label="shot">💉</Text>
                     </TouchableOpacity>
                   </View></> : 
+                  <>
                     <Text style={[styles.status, {color: '#e52736', fontWeight: '900'}]}>DRINKING STOPPED</Text>
+                    {(this.state.callUber == 'true') ? 
+                    <><Text style={[styles.status, { color: '#e52736', fontWeight: '900' }]}>AN UBER HAS</Text>
+                      <Text style={[styles.status, { color: '#e52736', fontWeight: '900' }]}>BEEN CALLED</Text>
+                    </> 
+                    : null
+                    }</>
                   } 
           </View>
                     {/*

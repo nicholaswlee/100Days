@@ -665,7 +665,7 @@ const styles = StyleSheet.create({
       backgroundColor: '#F3F3F3'*/
     },
     title: {
-      backgroundColor: '#f3f3f3',
+      backgroundColor: '#FFCE00',
       textAlign: 'center',
       flex: 1,
       fontSize: 30,
